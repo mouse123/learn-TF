@@ -1,0 +1,75 @@
+http请求
+$.ajax({
+
+    type: "GET",
+    url: "http://192.168.70.5/camare",
+    success: function(data){
+        document.getElementById('camare').src = data;
+    },
+    error: function(error){
+        console.log('error',error)
+    }
+    
+});
+
+node.js
+app.get('/camare',function(req, res){
+    var net = require('net');
+    var count=0;
+    var imgData = [];
+    var client = net.connect({port: 81, host:'192.168.200.82'},
+        function() { //'connect' listener
+          // console.log('client connected');
+          client.write('GET /snapshot.cgi?loginuse=admin&loginpas=11111111 HTTP/1.1\r\n\r\n');   // 模拟 HTTP请求
+    });
+    
+    client.on('data', function(data) {
+      if(count==0){
+
+      }else{
+        imgData.push(data);           
+      }
+      count++
+      client.end();
+    });
+    client.on('end', function() {
+      var IMG = Buffer.concat(imgData);
+      // console.log('client disconnected');
+      res.send('data:image/jpeg;base64,'+IMG.toString('base64'))
+    });
+}
+
+
+***************************************************
+socket请求
+socket.emit("camare");
+socket.on("camare",function(data){ 
+    img2.src=data;  
+})
+
+node.js
+socket.on('camare',function(){
+    var net = require('net');
+    var count=0;
+    var imgData = [];
+    var client = net.connect({port: 81, host:'192.168.200.82'},
+        function() { //'connect' listener
+          // console.log('client connected');
+          client.write('GET /snapshot.cgi?loginuse=admin&loginpas=11111111 HTTP/1.1\r\n\r\n');   // 模拟 HTTP请求
+    });
+    
+    client.on('data', function(data) {
+      if(count==0){
+
+      }else{
+        imgData.push(data);           
+      }
+      count++
+      // client.end();
+    });
+    client.on('end', function() {
+      var IMG = Buffer.concat(imgData);
+      // console.log('client disconnected');
+      socket.emit('camare','data:image/jpeg;base64,'+IMG.toString('base64'));
+    });
+}

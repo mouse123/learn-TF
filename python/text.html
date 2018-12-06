@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+<script type="text/javascript">
+var dataCount = 0;
+var dataArr = [];
+  var variable1Arr1 = []
+  var variable1Arr2 = []
+  var variable1Arr3 = []
+  var variable1Arr4 = []
+  //模拟数据
+  for(var i=0;i<50;i++){
+    variable1Arr1.push([{ 'Time':1508725116000+parseInt(Math.random()*1000),'var':1 }])
+    variable1Arr2.push([{ 'Time':1508725116000+parseInt(Math.random()*1000),'var':2 }])
+    variable1Arr3.push([{ 'Time':1508725116000+parseInt(Math.random()*1000),'var':3 }])
+    variable1Arr4.push([{ 'Time':1508725116000+parseInt(Math.random()*1000),'var':4 }])
+
+  }
+// 获取变量数据
+function getVarData(){
+  dataReady(variable1Arr1,'abcde')
+  dataReady(variable1Arr2,'abcde')
+  dataReady(variable1Arr3,'abcde')
+  dataReady(variable1Arr4,'abcde')
+}
+
+function dataReady (arr,id){
+  dataArr.push(arr);
+  dataCount++
+  if(dataCount == $('#'+id).attr('varName').split(',').length){
+    var titleName = $('#'+id).attr('varName').split(',');
+    createTable(dataArr,titleName);
+  }
+}
+// 对变量数组进行排序
+function getSortArr (arr){
+  var timeArr = []; 
+  var sortArr = [];
+  var data;
+  for(var i=0;i<arr.length;i++){
+    arr[i].map(function(item){ 
+
+        if(timeArr.indexOf(item[0].Time) == -1) {
+          //不存在
+          data = {};
+          data["var"+i] = item[0].var;
+          sortArr.push(item[0].Time);
+          timeArr.push(item[0].Time);
+          sortArr.push(data);
+        }else{
+          //存在
+          sortArr[sortArr.indexOf(item[0].Time)+1]  ["var"+i]= item[0].var;
+        }
+    }) 
+  }
+  timeArr.sort();
+  var finalData = [];
+  var tempData = [];
+  for(var i=0;i<timeArr.length;i++){
+    for(var j=0;j<sortArr.length;j++){
+      if(timeArr[i] == sortArr[j]){
+        tempData=[]
+        tempData.push(format(timeArr[i]))
+        tempData.push(sortArr[j+1].var0 || null)
+        tempData.push(sortArr[j+1].var1 || null)
+        tempData.push(sortArr[j+1].var2 || null)
+        tempData.push(sortArr[j+1].var3 || null)
+        finalData.push(tempData)
+      }
+    }
+  }
+  console.log(finalData)
+
+  return finalData
+}
+// 创建表格
+function createTable(arr,varName) {
+  
+  var finalData = getSortArr(arr);//获取排序后的数组
+  
+  varName.unshift("Time");
+
+  var rowCount = finalData.length;
+  var cellCount = varName.length;
+  
+  var table = $("<table border=\"1\" class='table table-hover' style='border: 1px solid black;'>");
+  table.appendTo($("#createtable"));
+   
+  var trHeader = $("<tr style='font-weight:bold;max-height:40px;font-size:18px;border: 1px solid black;'></tr>");
+  trHeader.appendTo(table);
+  for (var j = 0; j < cellCount; j++) {
+      var td = $("<td style='border: 1px solid black;background-color:green;height:40px;'>" + varName[j] + "</td>");
+      td.appendTo(trHeader);
+  }
+
+  for (var i = 0; i < rowCount; i++) {
+      var tr = $("<tr></tr>");
+      tr.appendTo(table);
+      for (var j = 0; j < cellCount; j++) {
+          var val="";
+              val = finalData[i][j];
+
+          var td = $("<td style='border: 1px solid black;'>" + val + "</td>");
+          td.appendTo(tr);
+      }
+  }
+  $("#createtable").append("</table>");
+  $("#createtable").css('border','0')
+}
+// 时间格式转换
+function add0(m){return m<10?'0'+m:m }
+function format(shijianchuo){
+  //shijianchuo是整数，否则要parseInt转换
+  var time = new Date(shijianchuo);
+  var y = time.getFullYear();
+  var m = time.getMonth()+1;
+  var d = time.getDate();
+  var h = time.getHours();
+  var mm = time.getMinutes();
+  var s = time.getSeconds();
+  return y+'-'+add0(m)+'-'+add0(d)+' '+add0(h)+':'+add0(mm)+':'+add0(s);
+}
+</script>
+</head>
+ 
+<body>
+    <input type="button" value="添加表格" onmousedown="getVarData()" style='position:absolute;z-index:200;top:100px;left:200px;'>  
+    <div id="createtable" class="table-responsive" style='position:absolute;z-index:200;top:150px;left:180px;width:400px;overflow-y:auto;height:300px;border:1px solid #000;'></div>  
+    <div id="abcde" varName="var1,var2,var3,var4">
+</body>
+</html>
